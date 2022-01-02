@@ -1,0 +1,24 @@
+\begin{thebibliography}{}
+
+\bibitem[Cabeza and Hermenegildo, 1997]{Cabeza97}
+Cabeza, D. and Hermenegildo, M. (1997).
+\newblock Www programming using computational logic sys tems (and the
+  pillow/ciao library).
+\newblock In {\em Proceedings of the Workshop on Logic Programm ing and the WWW
+  at WWW6}.
+
+\bibitem[Costa et~al., 2004]{yap}
+Costa, V.~S., Damas, L., Reis, R., and Azevedo, R. (2004).
+\newblock {\em Yap 4.5.2. User's Manual}.
+\newblock https://sourceforge.net/projects/yap/.
+
+\bibitem[SICStus 3.11.1, 2004]{sicstus}
+SICStus 3.11.1 (2004).
+\newblock {\em SICStus 3.11.1. User Manual}.
+\newblock http://www.sics.se/isl/sicstus.html.
+
+\bibitem[Wielemaker, 2004]{swi}
+Wielemaker, J. (2004).
+\newblock {\em SWI-Prolog 5.2.13. User Manual}.
+
+\end{thebibliography}

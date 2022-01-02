@@ -1,0 +1,654 @@
+\documentclass{llncs}
+
+\usepackage{graphicx,url}
+
+\newcommand{\upsh}{{Upsh}}
+\newcommand{\sicstus}{{SICStus}}
+\newcommand{\swi}{{SWI}}
+\newcommand{\yap}{{Yap}}
+\newcommand{\ciao}{{CIAO}}
+
+\newcommand{\comint}[0]{\mbox{\hspace{1cm}}}
+\newcommand{\unix}[1]{\\ \comint \% {\tt #1}\vspace{0.3cm}}
+\newcommand{\out}[1]{\\\comint {\tt #1}}
+
+\title{Upsh (2.0): A Unix to Prolog Shell}
+% \footnote{An earlier version fo this document was present in WLPE 2004}
+ 
+\author{Nicos Angelopoulos}
+\institute{
+Department of Computer Science,\\
+University of York, UK.\\
+\texttt{nicos@cs.york.ac.uk}
+}
+ 
+\begin{document} 
+ 
+\maketitle 
+ 
+\begin{abstract} 
+
+We present \upsh{}, a lightweight piece of software which enables the
+execution of Prolog programs from the 
+Unix\footnote{Trademark of Bell Laboratories}
+command prompt. This is achieved either by calling the 
+\upsh{} executable with a number of arguments or by 
+adding script lines to the source of the Prolog file.
+We will concentrate more on the former execution mode,
+since it allows execution of Prolog code without 
+changes to the source code. We detail the arguments 
+our program accepts and explain how these change its
+behaviour. \upsh{} runs on three different Prolog systems.
+The minor limitations on one of them are described.
+\end{abstract} 
+
+\section{Introduction}
+  Prolog has been used for the last thirty years primarily for
+  academic and research projects. Its relational form 
+  provides an intuitive model of encapsulation and a high
+  level of abstraction that favour rapid prototyping of
+  proof-of-concept programs.
+
+  Programming in Prolog is relational.
+  A query having some, possibly none, of its arguments fully or partially  
+  instantiated with its remaining arguments normally being variables,
+  to be instantiated by the call, is posed against predicate definitions
+  present in memory. This model has been very successful,
+  however, it presents two main limitations.
+  Firstly, it makes it harder to associate Prolog code with identifiable
+  programs having a default behaviour which can be fine-tuned
+  by runtime parameters. Its second limitation, which is to 
+  large extend a consequence of the first one,
+  is that it does not provide an effective interface for operating
+  system scripting.
+
+  Prolog has a number of features that make it suitable for scripting;
+  most notably its high level of abstraction. This comes at the cost
+  of computational power but it allows for very fast programming
+  and code reuse. As computational power becomes cheaper and programming
+  effort more expensive, Prolog is becoming a more realistic option for 
+  scripting.
+
+  We present a Prolog program, \upsh, which facilitates 
+  communication between the operating system
+  and Prolog programs. An executable saved state is generated from the 
+  \upsh{} sources. This state can be used to execute Prolog programs
+  by commands issued to the operating system shell. The Prolog programs
+  are expected to define an entry-level unary predicate.
+  
+  \upsh{} performs
+  transformations which convert operating system friendly arguments, to
+  term structures. These terms are passed as a list of options
+  to the entry-level predicate. \upsh{} is an attempt to bridge the gap
+  between the pragmatics of operating system programming and the relational 
+  form of Prolog.
+  Our software runs on three Prolog systems: \sicstus, \swi{} and \yap.
+  It should be trivial to adjust the software to run on like-minded
+  systems such as \ciao.
+
+  This paper is structured as follows.
+  Section~\ref{sec:motivation} provides some preliminary remarks.
+  Section~\ref{sec:conversion} shows how command line arguments are
+  translated to Prolog terms.
+  Section~\ref{sec:arguments} explains the arguments understood by \upsh.
+  Section~\ref{sec:internal} details where Prolog scripts are looked for
+  and the exit codes.
+  The concluding remarks are in Section~\ref{sec:conclusions}.
+
+\section{Preliminaries}
+ \label{sec:motivation}
+\subsection{Overview and Terminology}
+
+  Although script invocation is supported by most Prologs,
+  there are several drawbacks from the user's perspective:
+  (a) the source code has to be altered; usually adding
+  a couple of lines at the top of the source file,
+  (b) running the code on a different system requires
+  editing of the scripting lines (c) most scripting
+  allowed to-date, limit the callable predicate to something
+  like {\tt main/1}, (d) have poor support for translating
+  operating system arguments to Prolog terms and (e) leave 
+  the task of locating the script to the shell call.
+  \upsh{} attempts to avoid these problems by allowing
+  command line invocation via an executable Prolog state.
+
+  In this paper \emph{command line invocation} of Prolog programs.
+  refers to invocation from tcsh-compatible shells.
+  However, the principles apply to any Unix shell with minor modifications.
+  The command line invocation of
+  a Prolog program is facilitated by a saved state generated 
+  from the \upsh{} sources.
+  The process of creating the \upsh{} state is shown in
+  Fig.~\ref{fig:state}(a). Once the \upsh{} source file has 
+  been loaded a state is created using the \emph{host engine}'s primitives.
+  There are three logic engines which can host \upsh:
+  \sicstus, \swi{} and \yap. When creating the state, the initial 
+  goal is also set to an \upsh{} defined predicate.
+  % Although the \upsh{} sources are common
+  % for all three hosts, the process of generating the state slightly varies. 
+  
+
+	Assuming that the generated state is placed in a directory
+	executed as a shell command. 
+  	We will refer to \emph{operating system arguments} or simply 
+  	\emph{arguments} to everything that follows the shell command 
+	invoking the executable state.
+
+	Once invoked, the state calls an initial predicate. This 
+	performs the following: translates the arguments to 
+	term structures, loads one or more Prolog source files 
+	(also referred to as \emph{scripts}) and calls a single goal of arity 1
+	or a conjuction of single arity goals.
+	The predicates defining this \emph{entry-goal(s)},
+	should be present in the scripts. Typically the entry-goal
+	has the same predicate name as the filename minus the `.pl'
+	extension.
+   Fig.~\ref{fig:state}(b) summarises command line invocation.
+
+	\begin{figure}[tb]
+ 	 \begin{center}
+		\includegraphics*[height=0.3\textheight]{figs/state.eps}
+	 \end{center}
+	 \caption{Creating the Upsh state (a) and command line invocation (b).}
+	 \label{fig:state}
+	\end{figure}
+
+% \subsection{Motivation}
+
+  The generic form of command line invocation of \upsh{} is
+  \unix{upsh UpshArgs [-] Script ScriptArgs}
+  \label{sec:explain}\\
+  {\tt UpshArgs} are one-character long arguments controlling the 
+  behaviour of \upsh{} (these are explained in detail in 
+  Section~\ref{sec:arguments}). '-' is the separator, which explicitly
+  divides the command line argument to \upsh-specific and script-specific.
+  The first script-specific argument is taken to be the script
+  filename, while the rest are normally translated by $Upsh$ to term
+  structures and passed to the script as a list of terms comprising
+  the call parameter to the entry-goal.
+
+	We use \verb+<>+ around types of
+	objects to which the user is expected to supply a particular value.
+
+% NOTE: Can add recognision of engine.\\
+% NOTE: add example.
+
+ \subsection{Prolog for scripting}
+  The high level, at which one can program in Prolog, suggests
+  that the language might be an important tool for scripting. 
+  Such use has been advocated by the CLIP group at the 
+  University of Madrid, e.g. \cite{Cabeza97}.
+  \upsh{} attempts to enhance these possibilities by providing
+  a layer between the operating system and the Prolog code.
+  The main scripting tasks we have had experience with are:
+  building operating system utilities, constructing
+  wrappers for scientific applications, provide auxiliary 
+  support to such applications- such as displaying of produced 
+  output, and supporting the web interface of a
+  meta-interpreter\footnote{\url{http://www.doc.ic.ac.uk/~nicos/cgi/pfds/pfds.cgi}} which uses the Pillow library \cite{Cabeza97}.
+
+  As the cost of computing power reduces while that of programming time rises,
+  we feel that Prolog is becoming more relevant to scripting tasks.
+  Scripts developed in Prolog are faster to compose and debug, easier to 
+  maintain and, in most cases, clearer for other people to understand.
+  The main drawback is the time they take to execute.
+  It is unlikely that Prolog will replace low level 
+  languages in scripts that used repeatedly and have a well defined 
+  task, e.g. the {\tt grep} command. However, for more specialised
+  tasks the above benefits outweigh the performance penalty.
+
+  Of crucial importance to the future of Prolog as a scripting language,
+  is the available of cross-engine libraries which will provide
+  richer building blocks.
+
+ \subsection{Options versus Arguments}
+  The use of Prolog for scripting depends to a large extent
+  to the provision of an entry-level that is based on options rather than 
+  arguments. An option based predicate differs from the usual
+  arguments based predicate, in that a default behaviour is always
+  available even in the absence of any options. The list of options
+  only contains those options for which the user wants to explicitly
+  change their value.
+
+  A number of built-in predicates have as part of their arguments a 
+  list of options. For instance, see predicate 
+  {\tt absolute\_file\_name/3} in the \sicstus{} manual \cite{sicstus}.
+
+  \upsh{} strengths with regard to scripting and options based code are :
+  \begin{itemize}
+   \item support of multiple engines 
+	\item it does not require changes to the Prolog source code
+	\item provides uniform translation from operating system friendly arguments
+	 to Prolog term structures
+	 \item its small size
+	 \item built-in facilities for locating scripts
+  \end{itemize}
+
+\section{Argument conversion}
+ \label{sec:conversion}
+  \upsh{} provides a uniform way for converting command line
+  arguments to term structure options passed to the invoked Prolog program.
+  The arguments' syntax is based on special characters that can 
+  pass the first parsing by most operating system shells.
+  The arguments are translated to term structures which are easier to
+  manipulate in Prolog. There are three special characters, 
+  `=', `,' and `:'. The escape character is $\backslash$.
+
+  In the simplest case, terms are built from `=' argument pairs.
+  An argument pair $Name\!\!=\!\!Value$ will translate to a term $Name(Value)$.
+  Multiple arguments in the term structure are allowed when separated by
+  commas. $Name\!\!=\!\!Value1,\ldots, ValueN$
+  translate to the term structure $Name(Value1,\ldots,ValueN)$.
+  Spaces in the system arguments are important, since \upsh{}
+  depends on the executing Prolog to provide the first parse.
+  Thus, no space should appear before `=' or the
+  $Values$ and the separating commas. However, for ease of use 
+  spaces are allowed after the special characters.
+  
+  Arguments not containing an `=' are interpreted as atoms or
+  Prolog variables.
+  An argument is considered to be a Prolog variable if its first 
+  character is in upper case. To force the translation of such an argument 
+  to an atom, we can prefix the argument with `atm='.
+  For example, rather=atm=Not will translate to rather(`Not').
+
+  \begin{figure}[tbh]
+   \input{figs/say.tex}
+   \caption{A trivial Prolog script program.}
+   \label{tbl:say}
+  \end{figure}
+ 
+  Nested use of `=' is allowed. To signify the end of comma separated 
+  values for a nested argument, the outer level comma should be 
+  replaced by a `:'. It is thus possible to distinguish between 
+  t(n(a,b)) and t(n(a),b). The argument syntax for the former is
+  t=n=a,b while for the latter it is t=n=a:b.
+
+  Consider the program in Fig.~\ref{tbl:say} and recall that the 
+  general command line invocation is 
+  \unix{upsh UpshArgs [-] Script ScriptArgs}\\
+  Using the simple script of Table~\ref{tbl:say} we  can demonstrate 
+  {\upsh}'s conversion of arguments, with:
+  \unix{upsh say fst sec=a1 trd=n1=a2,a3 fo=n2=n3=x::7 atm=V - V h V}\\
+
+  The output from this command is:
+  \out{fst}
+  \out{sec(a1)}
+  \out{trd(n1(a2,a3))}
+  \out{fo(n2(n3(x)),7)}
+  \out{V}
+  \out{\_7649}
+  \out{h}
+  \out{\_7649}\\
+  This example shows : (a) consecutive `=' are used to create nested terms,
+  (b) `atm=' prefixes an atomic value that starts with a capital letter,
+  (c) commas are used for multi-argument terms, (d) use of `:' and (e)
+  variables with the same name translate to the same Prolog variable.
+  It is worth noting that `7' is passed to the options as a number and
+  not as an atom, which is the way some engines pass such arguments.
+
+  Note that the arguments separator, `-', is used prior to argument `h' to
+  signal that all the remaining arguments are script specific.
+  \upsh{} is normally not strict about the use of the separator, however,
+  in this example its use is necessary before `h' because it is a valid \upsh{}
+  argument.
+  Variables, should also appear after the separator since internally,
+  they can be interpreted as any single letter argument.
+
+	Similarly to `atm=', `lst=' and `trm=' are recognised.
+	For example
+  % \unix{upsh say lst=a,b,d=w:e trm='x-y(t)'}\\\vspace{-0.2cm}
+  \unix{upsh say lst=f,nest=n1,l3=m1:n2,s,lst=t,atm=m:g=i,trm='c-a(b)'}\\
+  \noindent outputs
+  \out{[f,nest(n1,l3(m1),n2,s,[t,m],g(i,c-a(b)))]}
+
+  The special characters can be escaped when are preceded by '$\backslash$'.
+
+\section{\upsh{} Arguments}
+ \label{sec:arguments}
+ As can be seen from the help message of Table~\ref{tbl:help} calls of the
+ \upsh{} command can be summarised as:\\
+ {\tt upsh \{h,v\}\verb+~+ \{(c),s\} \{(m),n\} [b,e/1,f/1,d,p,o,r,w,a] - Program [Args]* }
+ Curly brackets separate mutually exclusive arguments. \{\}\verb+~+ means these
+ arguments override, i.e. do not actually execute a script, but simply
+ print some information about \upsh{} and then exit. Argument values within
+ brackets, `$()$', are the default values for their corresponding set of
+ mutually exclusive argument values.  The pair of square brackets
+ hold a number of optional arguments. Arg/1, stands for an argument which 
+ expects a parameter, e.g. use `e' in a call as, e=$<\!\!ErrorFile\!\!>$.
+ []* stands for a number of program specific arguments.
+
+ All \upsh{} arguments are one character long.
+ In this Section, we detail the use of these arguments.
+
+ \begin{table}[t]
+  \input{figs/upsh-help}
+  \caption{\upsh{} help message}
+  \label{tbl:help}
+ \end{table}
+% \section{Discussion}
+ \subsection{Invocation} % c, s, e, f
+  \upsh{} can be called either from the command line, or from the Prolog
+  script file itself. The main design has been built around the command
+  line invocation, however, scripting is also fully supported.
+  The invocation method should be signalled with one of `c' or `s' arguments,
+  for command line and scripting invocations respectively. These are 
+  mutually exclusive arguments, so only one should be given. The default is
+  `c'.
+
+  When scripting is used, the following two lines should be added to the
+  top of the Prolog script file :\\
+  \out{\#!/bin/sh}
+  \out{exec upsh s - \$0 "\$@"}\\
+  This requires that upsh is in a directory in your \$PATH environment
+  variable and that the Prolog file has been made executable.
+  When the file is called, the name of the
+  source file will be substituted for \$0 and all remaining arguments will be
+  substituted for \$@. Alternatively, \\
+  \out{exec upsh s \$0 "\$@"}\\
+  can be used. This is more flexible, in that \upsh{} arguments can be
+  passed at call time, however, one needs to be more aware about mixing
+  the two types of arguments. Note, that \$0 will be recognised correctly
+  as the script's name. This is always taken to be the first non \upsh{} 
+  argument.
+
+	Argument 'f=CallName' is used to change the default entry-goal.
+	The entry predicate is always unary. Its predicate name is $<\!\!CallName\!\!>$
+	and its argument is the list of translated terms that correspond to 
+	program-specific arguments of the invoking \upsh{} call.
+   If this argument is not present {\tt <Program>/1} and {\tt main/1}
+	are looked for, in this order.
+
+	Argument `e=ErrorFile' is used to redirect {\tt user\_error} to file
+	\verb+<+$ErrorFile$\verb+>+. When absent, this stream is directed
+	to {\tt user\_output}.  Note, that the identifier to {\tt std\_err} is lost,
+	since for some of the supported engines we need to redirect their error
+	stream at invocation.
+	This is the case because on these engines we have no alternative
+	means for avoiding the initial info message.
+
+	Alternatively, \upsh{} can be used with a number of scripts.
+	The general form is: 
+	\unix{ upsh [c] \{(m),n\} UArgs [\{t,i\}= Pn[,Vn] [PnArgs]]*}\\
+	Each $Pn$ is a different script file. In combination with use of
+	variables this presents a powerful way of combining scripts.
+	The $i/2$  option, is for producer scripts. The second argument should
+	be a variable, which will be passed to the script. The intuition is that
+	the script will instantiate this to a term structure which can then
+	be passed to consequetive scripts. In this mode, the entry goal is
+	a composite, conjunctive, one. Each $Pn$ contributes a single goal
+	which is formed from its base name and has arity 1. The order remains
+	as the one in the command-line.
+
+  \noindent For example,
+  \unix{upsh i= scripts/tell\_story,L t= scripts/say L}\\
+  from the distribution's top directory, produces:
+  \out{[the,hello,world,story]}\\
+  \noindent Compare this to 
+  \unix{upsh i=scripts/tell\_story,L i=scripts/say,L}\\
+  which outputs 
+  \out{the}
+  \out{hello}
+  \out{world}
+  \out{story}
+
+ \subsection{Loading}    % d, m, n, p
+   The mutually exclusive options `m' and `n' control the script's loading
+	method. The former, which is the default, will use compile for 
+	loading the script, while the latter will consult the program.
+	In most systems the difference between the two methods is that 
+	the one creates more efficient code, compilation, while the other,
+	consultation, creates more transparent code, e.g. traceable and/or 
+	listable.
+
+	When using scripts, it is often the case that the user does not want
+	any of the loading information printed by Prolog engines. 
+	\upsh{} provides a uniform way for suppressing such unwanted information
+	with the `p' argument. We had to implement this feature in a 
+	variety of ways for the supported engines. In \sicstus{} 
+	we asserted four {\tt portray\_message/2} hooks, \cite{sicstus}.
+	The first argument was always `informational' while the second arguments
+	used were 
+	{\tt imported/3}, {\tt loading/3}, {\tt loaded/6} and
+	{\tt foreighn\_resource/4}. We simply catch these messages, silently 
+	succeeding, thus suppressing any output. In \swi{} we use 
+	the {\tt silent/1} option of {\tt load\_files/2}.
+	Finally, \yap{} provides the 
+	{\tt informational\_messages} identifier in {\tt prolog\_flag/2},
+	see \cite{yap}. 
+	This provides the exact behaviour of `p' argument.
+   
+	Argument 'd/1' takes a single parameter. It can be used to 
+	change the working directory to the given parameter. The 
+	change of directory will take effect before any consultation
+	or other operation, such as creating the \verb+<+$ErrorFile$\verb+>+ takes place.
+	
+ \subsection{Calling}    % o, r, a
+  
+  Argument translation and presentation can be fine-tuned at call time 
+  in a number of ways. Argument `o' suppresses translation of arguments, such as
+  `=' including tokens. For example the argument {\tt nice=tara}
+  will be left untranslated
+  and passed to the program as the atomic entity: 'nice=tara'. This is also
+  the case for arguments starting with a capital letter; they will be passed
+  as atoms to the program. Note that non-translation applies to all 
+  arguments following the separating `-' but has not effect to the ones
+  before the separator. This behaviour ensures translation of
+  \upsh-specific arguments always occurs.
+	
+	In general, \upsh{} is not very strict about the use of the separator,
+	`-'. As detailed in Section~\ref{sec:explain} the first use of 
+	one-character long arguments that are known to \upsh{} are interpreted
+	as such. All remaining arguments, apart from the first are translated and
+	passed to the call predicate in the form of a list. The first argument,
+	is taken to be a Prolog program which \upsh{} will load into memory.
+	Argument `r' overrides this
+	behaviour by forcing the separation of arguments by `-'.
+	All arguments before `-' are treated as \upsh{} arguments,
+	while all the ones after the separator are passed to the script.
+	Again, apart from the first one, which is the script source.
+
+   In the systems providing {\tt codes\_to\_term/3},
+	it is possible to pass the pairs of variable names and Prolog variables
+	in the script options. The use of argument `a' adds the option
+	{\tt upsh\_vs/1} to the script options. Its parameter is a list of
+	$VaribleName=Variable$ pairs. For example consider the following call 
+	using the script from Table~\ref{tbl:say}:
+	\unix{upsh a - say T L S T}\\
+	This command's output is:
+	\out{\_7054}
+	\out{\_7278}
+	\out{\_7502}
+	\out{\_7054}
+	\out{upsh\_vs([[T=\_7054],[L=\_7278],[S=\_7502]])}
+
+ \subsection{Modifiers}  % h, v, b, w
+  We have used the term overriding arguments to group the arguments
+  that override, or ignore, all other arguments, by forcing \upsh{}
+  to write something to the output stream and then exit, without
+  actually running a Prolog script. There are two such arguments:
+  'h' prints the help message presented in Table~\ref{tbl:help}, 
+  while 'v' prints the current version and running engine. 
+  For example :
+  \unix{ upsh v }\vspace{-0.3cm}
+  \out{Upsh (1:0:0)-yap(4:5:2)-(2004/6/9-15:32:50)}\\
+  In the above, (1:0:0) is the \upsh{} version, yap(4:5:2) is the engine 
+  on which the \upsh{} state was created and  (2004/6/9-15:32:50)
+  is the compilation timestamp.
+
+  Argument 'b' switches on the verbose mode. A number of informational
+  messages are printed from within \upsh{} enabling users to see
+  which arguments are passed to their script along with other details.
+  For example the call 
+  \unix{upsh b say tara}\\
+  produces output:\\
+	\out{all\_os\_arguments([b,say,tara])}
+	\out{defragmented\_os\_arguments([b,say,tara])}
+	\out{all\_upsh\_arguments([b,say,tara])}
+	\out{main\_pl\_arguments([say,tara])}
+	\out{executing\_from\_command\_line}
+	\out{loading(/home/nicos/pl/upsh/scripts/say)}
+	\out{upsh\_calling(say([tara]))}
+	\out{tara}
+
+  	% \out{\url{/usr/nicos/pl/upsh/say}}
+  {\tt all\_upsh\_arguments/1} prints the translated form for all the
+  input arguments at the left of any `-'.  {\tt main\_pl\_arguments/1} prints
+  the script file, first element in list, and the arguments that will 
+  be passed to it. {\tt executing\_from\_command\_line} informs of 
+  the calling method.
+  The following line, gives the full path of the script location.
+  The final line in the presented example, is the output from the script.
+
+  When using a script in a terminal whose life-span is identical to that
+  of the script, it is useful to have a uniform way of postponing the end 
+  of the process until some input, minimally the enter key, is given by the
+  user. In such or similar scenarios, the input is not necessary part of
+  the script's function but rather a necessity of the method
+  we use to call the script. It is thus useful to incorporate such a
+  simple mechanism into \upsh{} which is part of the calling mechanism,
+  rather than change all scripts. In this spirit, argument 'w' waits
+  for a single press of the return key, at the end of the script call.
+
+\section{Internals}
+ \label{sec:internal}
+In this section we give details on how \upsh{} locates the command
+line scripts, its exit codes and some implementation issues.
+
+\subsection{Locating scripts}
+
+  The simplest method for locating a script is by looking at the 
+  current directory. If a matching Prolog file is present in the current
+  directory, then it is selected. Another method is by giving the full or 
+  relative path of the file.
+  However, since scripts normally operate on files located in
+  arbitrary places in the filestore, it is convenient to uncouple 
+  the script location from the location of the files it operates on.
+  \upsh{} provides two alternative ways of searching for its scripts.
+  
+  \begin{table}[t]
+   \input{figs/lookup}
+   \caption{Example {\tt \$HOME/bin/upsh\_cline/Lookup.pl} file.}
+   \label{tbl:lookup}
+  \end{table}
+
+  Before compiling \upsh{}, the definition of {\tt file\_search\_path/2},
+  found in \url{src/upsh.pl} can be edited.
+  Its first argument should be left as is in the source to the value 
+  {\tt upsh}. The second argument should point to a directory where 
+  scripts can be found. Note, that a number of such directories can be
+  added. At run time, the first directory found to contain a matching
+  Prolog file will be selected. The order is the same as the order the
+  clauses appear in the file. 
+  With this method, scripts are collected to specific directories.
+  A benefit of this approach is that it also works for script files
+  which are symbolic links. 
+
+  Alternatively, script locations can be indexed by script names in the 
+  file \url{\$HOME/bin/upsh_cline/Lookup.pl}. The file should define
+  predicate \linebreak
+  {\tt upsh\_look\_up/2}. Each first argument should be
+  the name of a script while the second should the scripts 
+  directory location. An example of such a file is shown in 
+  Table~\ref{tbl:lookup}.
+  The main advantage of this approach is that all additions can happen 
+  after compiling \upsh{} and that there is no need to create 
+  symbolic links. If another location is preferable for this file,
+  then the source \url{src/upsh.pl} can be edited and the \upsh{} 
+  state recreated.
+  
+  Finally, the relative path from current directory can be given.
+  The forward slashes are handled properly by \upsh. 
+  Furthermore when `t/1' and `i/2` are used, the use of a space between
+  the `=' and the script name can be used to assist with shell auto-completion.
+  For example,
+  \unix{upsh i= scripts/tell\_story,L t= scripts/say L}\\
+  from the distribution's top directory, produces:
+  \out{[the,hello,world,story]}
+
+\subsection{Exit codes}
+  When terminating, \upsh{} uses {\tt halt/1} with a parameter that reflects
+  the circumstances of termination. The parameter
+  is a small integer that can be
+  picked up from a csh-compatible shell\footnote{on a sh-compatible shell
+  use: \# echo \$?}
+  with the use of \unix{echo \$status}
+
+  The codes are
+  \begin{description}
+   \item{{\bf 0}} everything run to completion successfully
+   \item{{\bf 1}} an exception was raised while executing the script
+   \item{{\bf 2}} an error occurred while trying to locate, or load the script file
+   \item{{\bf 3}} incompatible options were used
+   \item{{\bf 4}} there was an internal failure. Either
+   \item{{\bf 5}} no suitable entry-goal found.
+	one of \upsh's own arguments contained unrecognised elements, or other
+	arguments contained syntax errors.
+  \end{description}
+  % \section{Discussion}
+
+\subsection{Implementation Issues}
+	The version can be picked from scripts with 
+	\out{upsh\_flag(upsh\_version,UpshVer)}.\\
+	\noindent $UpshVer$ is a composit term: $Ver-Pl-Date$.
+	$Ver$ brakes down to $Mj:Mn:Fix$, each being an integer.
+	$Pl$ is a term identifying the underlying engine and has
+	the form $Sys(PlMj:PlMn:PlFx)$. $Date$ is composed from
+	$Year/Month/Day-Hour:Min:Sec$ and denotes the time the 
+	\upsh{} state was compiled.
+
+	If the entry-goal fails, a warning is printed on `user\_error'
+	and the halt code is set to 1.
+	All predicates in \upsh{} start with the `upsh\_' prefix.
+	The predicate {\tt upsh\_built\_call( true )} succeeds 
+	at built invocation of \upsh. Useful if you trying to 
+	debug the software. Only intended for developers.
+
+	To install \upsh{} change to the distribution directory and
+	use `upsh\_Sys', with $Sys$ to one of `sicstus' `swi'  or `yap'.
+	This will create executable `~/bin/upsh'.
+	Multi \upsh can co-exist. Simply rename preceeding executables.
+	For instance from `~/bin/upsh' `~/bin/upsh\_swi'.
+	To avoid loading your start-up file on the stae creation
+	call to the Prolog engine, use the `-f' flag with any of the
+	three `make\_Sys' shell scripts.
+
+\section{Conclusions}
+ \label{sec:conclusions}
+  We have presented a program that helps to bridge the gap 
+  between the needs of operating system scripts and those of 
+  Prolog programs. Our software can be used to run Prolog scripts
+  in two modes. Command line invocation, in particular, is a new 
+  approach providing script calling functionality. In highlight, 
+  \upsh{} (a) does not require changes to the source files,
+  (b) it presents a uniform method of translating between 
+  system arguments and Prolog terms, and (c) has flexible mechanisms
+  for locating scripts.
+
+  We hope that the presented program will assist in the wider 
+  use of Prolog for scripting and in building demonstrative, easy-to-use
+  wrappers around standard Prolog code. In the future it will be interesting
+  to evaluate the impact of \upsh{} on systems that provide drag and drop 
+  interaction. 
+
+  \upsh{} runs on three different engines: \sicstus, \swi{}
+  and \yap. Its core functionality should be easy to implement in
+  other Prolog systems, such as \ciao and GNU Prolog.
+  \upsh{} is available from
+  \url{http://www.cs.york.ac.uk/~nicos/sware/upsh/}. It is
+  distributed in source form which experts in other engines can adopt.
+  Our reasons for not supporting more engines is lack of expertise and
+  of available time.
+
+ \bibliographystyle{apalike}
+ \bibliography{upsh}
+
+\end{document}
+
+\begin{figure}[tb]
+	\begin{center}
+		\includegraphics*[height=0.363\textheight]{libs.eps}
+	\end{center}
+	\caption{all sorts of libraries}
+	\label{fig:libs}
+\end{figure}

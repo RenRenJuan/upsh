@@ -1,0 +1,6 @@
+#!/bin/sh
+
+hf=figs/upsh-help.tex
+echo "\begin{verbatim}" > $hf
+upsh h >> $hf
+echo "\end{verbatim}" >> $hf

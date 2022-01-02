@@ -1,0 +1,112 @@
+---   Releases   ---
+--------------------
+
+2.5         @    19.12.23
+     19.12.10    DOC:      examples formating was off
+     19.10.26    FIXED:    work around changes in latest SWI development: app_data -> user_app_data 
+     19.03.15    IFACE:    remove :- set_prolog_flag( allow_dot_in_atom, true ).
+                 CHANGE:   only load .rc (~/.swiplrc) file if it exists (avoid error when user doesn't have one...)
+     18.12.12    DOC:      Added description to upsh_make/1.
+
+2.4         @    18.12.10
+     18.12.10    CHANGE:   simpler build process no need to call shell/1
+
+2.3         @    18.05.02
+     18.05.02    IFACE:   change the executable module to upsh_exec (so doc server runing over upsh exec can load upsh for docs)
+                 DOC:     added text for upsh_make/0+1
+                 DOC:     added module documentation and updated web page
+     18.05.01    DOC:     small changes to Readme.txt
+
+2.2         @   18.04.30
+     18.04.30   FIXED:    entry goal upsh/0, call module upsh rather than user
+     18.01.26   CHANGE:   this file to Releases.txt and update its syntax to standard stoics format
+                IFACE:    add scripts dir from packs to upsh's path
+     18.01.03   ADDED:    makefile with make (so pack_rebuild, rebuilds the executable) and tiny check.
+                CHANGE:   upsh v, output to be more termie
+
+2.1       @   17.06.03  Published as an SWI pack.
+
+2:0:0
+Mon Dec 20 11:56:00 GMT 2004
+New exit code 5. No suitable entry goal found.
+Escape character changed from / to \ .
+Paths are now allowed without quotes. Script name is taken without 
+the path part or any extensions. 
+Multiple scripts allowed with i/2 and t/1.
+Space is allowed after special argument codes ('=', ':', ',').
+Added argument y/2, Name,Arity, for spying.
+Added upsh_built_call( true ) for building invocation 
+(only intended for developers).
+Added lst= and trm= .
+Upgraded the Wlpe 2004 paper to manual.
+
+1:1:3
+Fri Aug 27 14:55:30 BST 2004
+Changed all select/3 to upsh_select_nv/3. As to avoid variables on command line
+trigger the upsh options.
+Added / as the escape character in OS arguments.
+
+1:1:2
+Wed Aug 11 13:02:40 BST 2004
+Added support for variables in command line for SWI-Prolog. Uses atom_to_term/3.
+Fixed installation script for SWI.
+Renamed UpshWple04.ps.gz to UpshWlpe04.ps.gz
+
+1:1:1
+Tue Jul 20 12:26:03 BST 2004
+A couple of fixes to the translation of command line arguments to Prolog arguments.
+
+1:1:0
+Thu Jun 10 11:47:23 BST 2004
+Added Base/0 as a possibility for main call when Base/1 is not present.
+Fixed incorrect handling of arguments (was affecting error stream redirection).
+Added ':' syntax for arguments translating to nested terms.
+Final version of Wple02 in doc/ .
+
+1:0:0
+Tue Apr 27 16:50:35 BST 2004
+First public release. All features are supported as detailed
+in doc/Upsh2004.ps.gz . 
+In particular Upsh runs on current releases of the three supported
+systems: SICStus, SWI and Yap.
+
+2:0:1
+Wed Jan  5 10:16:25 GMT 2005
+Make sure the lookup files are atomic.
+Fix quoting of '.' that was not quoting over capital letters.
+Any argument including / is passed as an atom if it referes to 
+a directory, otherwise, as a term. An argument if it, or its .pl 
+extension, exists, or if the part of the argument left of the 
+first '/' is an existing directory.
+Fixed f/1 argument's instantiation error.
+
+2:0:2
+Wed Jun  8 17:00:06 BST 2005
+Changed compilation mode to l/1. Recognising co(m)pile, co(n)sult and (l)ocate.
+Minor changes to help message.
+Extended w/0 to w/1. Argument must be in {bell,input,both,none}.
+Added bb_put( upsh_exec, UExec ) for scripts to pick up the location of 
+   executing script. Useful when multiple upshes are present on a single system.
+   In Swi this is flag( upsh_exec, Uexec, Uexec ).
+Use of SICStus-3.12.2's --noinfo and prolog_flag( informational ). This means
+Upsh does no longer have to redirect its error at the top of the saved state.
+
+2:0:3
+Fri Sep  2 12:35:42 BST 2005
+Added edit selection to loading option /1.
+Fixed upsh_pl_call_version/4 bug (2.0.2 would not run on anything but SICStus).
+
+2:0:4
+Wed Apr 11 20:16:14 CEST 2012
+Support for n/1,2 Base/Arity calls.
+Standardised ./make_yap and ./make_swi.
+Changed bin/upsh_cline to bin/cline_upsh.
+Added l/1 to documentation.
+Cleaned code to user upsh_error/1,2.
+Support for x/1 for auto call of usage_example/1 registered examples.
+Added r/1*=s,w/n
+Added f/0.
+Encapsulate to module upsh, which should make things cleaner. 
+Furhter clean up of make_{swi,yap}. Removal of old "both" flag.
+Single executable now supporting 'p' and 'f' upsh flags.
+Tested on latest SWI (6.1.3) and Yap (6.2.2).

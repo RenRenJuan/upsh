@@ -1,0 +1,15 @@
+Add num= similar to atm=, trm= and lst=.
+exit code 5 for multiple scripts. rechechk exit codes.
+update wple paper and add glossary.
+More lookups ? Option for Lookup file on command line.
+Yap install with --with-upsh. 
+:- ul( upsh_locator ).
+:- upsh_loade( Script(s) ).
+Allow p to be default at creation. p=t and p=f should replace p, overriding
+   whatever was the default at creation.
+
+Replace c and with a single option c=c/s.
+
+allow hooks for examples in help.
+would make sense then to ensure_loaded all ul/1 load/1 whatever,
+before the help

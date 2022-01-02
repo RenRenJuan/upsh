@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>upsh.pl -- Unix to Prolog shell.</title>
+
+<link rel="stylesheet" type="text/css" href="pldoc.css">
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+
+</head>
+<body>
+
+
+<h1 class="file"><span style="float:right"></span>upsh.pl -- Unix to Prolog shell.</h1>
+
+<h1 class="wiki">Upsh 2.5</h1>
+
+<p>
+Upsh stands for Unix to Prolog shell. It is a Prolog program which can be used to run Prolog programs from the command line or as scripts.<br>
+It origianlly ran on three prolog engines without changes to the source code.
+Current versions are only tested on SWI-Prolog.</p>
+
+<p>
+With version 2.*, Upsh has all the features I had envisaged and many which I just thought of on the way.
+It is also fairly stable. <br>
+The development has now been switched to SWI and upsh is also provided as an easy to install SWI pack.&lt;br&gt;</p>
+
+<p>
+It is unlikely there will be any major releases in the future. I will of course get fixes on reported bugs
+or add features that are interesting. <br>
+For reporting a bug or feature requests contact me:</p>
+
+<p>
+<a href="http://stoics.org.uk/~nicos/sware/contact.html">http://stoics.org.uk/~nicos/sware/contact.html</a></p>
+
+<p>
+If you use Upsh for a while I would appreciate an email with the kind of scripts you using it with.</p>
+
+<p>
+The pack has a single main predicate which creates an executable state that provides a convenient way of executing prolog scripts for the command line.<br>
+The state can be invoked by calling the created executable (upsh) on command line. <br>
+By default the upsh binary is placed in same directory as the swipl executable. Only tested on linux.</p>
+
+<pre class="code" ext="">
+Install:
+?- pack_install(upsh).
+
+Load:
+?- use_module(library(upsh)).
+
+Create the executable.
+?- upsh_make.
+
+test.
+
+?- halt.
+
+-- ask your shell to re-read its executables with something like: rehash
+
+upsh say naku
+
+%  /home/nicos/.rcpl compiled 0.00 sec, 8 clauses
+% /home/nicos/bin/cline_upsh/say.pl compiled 0.00 sec, 5 clauses
+naku
+
+lykos;upsh/scripts% upsh v
+upsh_exec(upsh(2:2:1),swi(7:7:13),built_on(2018/5/2,14:42:49))</pre>
+
+<p>
+The executable will look into three places for scripts.</p>
+<ul>
+<li>local directory</li>
+<li>$HOME/bin/cline</li>
+<li>PACK/scripts for any installed PACK</li>
+</ul>
+
+<p>
+Upsh will also convert os friendly arguments to Prolog terms:</p>
+
+<pre class="code" ext="">
+upsh say a=b
+%  /home/nicos/.rcpl compiled 0.00 sec, 8 clauses
+% /home/nicos/bin/cline_upsh/say.pl compiled 0.00 sec, 5 clauses
+a(b)</pre>
+
+<p>
+The executable takes a number of one letter flags:</p>
+
+<pre class="code" ext="">
+upsh say p a=b
+%  /home/nicos/.rcpl compiled 0.00 sec, 8 clauses
+a(b)
+
+upsh say f p a=b
+a(b)</pre>
+
+<p>
+By default the executable looks into script <code class="nofile">say.pl</code> for <a class="builtin" href="http://www.swi-prolog.org/pldoc/man?predicate=main/0">main/0</a>, <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=main/1">main/1</a>, main/n, <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=say/0">say/0</a>, <a class="extmanual" href="http://www.swi-prolog.org/pldoc/man?predicate=say/1">say/1</a>, say/n and calls it with the appropriate number of arguments.</p>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- nicos angelopoulos</dd>
+<dt class="keyword-version">version</dt><dd class="keyword-version">- 2.3 2018/5/2</dd><dd class="keyword-version">- 2.4 2018/12/10 simplified <a href="upsh.html#upsh_make/1">upsh_make/1</a> (no more shell call to build the executable).</dd><dd class="keyword-version">- 2.5 2019/12/23 work around new SWI configs</dd>
+</dl>
+
+<dl>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="upsh_make/0"><b class="pred">upsh_make</b></a></dt>
+<dt class="pubdef"><span style="float:right">&nbsp;</span><a name="upsh_make/1"><b class="pred">upsh_make</b><var class="arglist">(Opts)</var></a></dt><dd class="defbody">Create an upsh executable for running Prolog scripts from command line.
+
+<p>
+<var>Opts</var></p>
+
+<dl class="termlist">
+<dt class="term"><span class="pl-compound pl-level-0"><span class="pl-functor">bin_dir</span>(<span class="pl-compound"><span class="pl-avar">BinDir</span><span class="pl-infix">=</span><span class="pl-avar">SwiBin</span></span>)</span></dt><dd>directory for putting the executable in, defaults to the one holding swipl
+constructed from <code>current_prolog_flag( home, Home )</code>.</dd>
+<dt class="term"><span class="pl-compound pl-level-0"><span class="pl-functor">exec</span>(<span class="pl-compound"><span class="pl-avar">Exec</span><span class="pl-infix">=</span><span class="pl-atom">upsh</span></span>)</span></dt><dd>name of executable</dd>
+</dl>
+
+<dl class="tags">
+<dt class="keyword-author">author</dt><dd class="keyword-author">- Nicos Angelopoulos</dd>
+<dt class="keyword-version">version</dt><dd class="keyword-version">- 0.1 2017/06/03</dd><dd class="keyword-version">- 0.2 2018/12/10</dd>
+</dl>
+
+</dd>
+</dl>
+
+<h2 class="undoc">Undocumented predicates</h2>
+
+<p>
+The following predicates are exported, but not or incorrectly documented.</p>
+
+<dl class="undoc">
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="upsh_version/2"><b class="pred">upsh_version</b><var class="arglist">(Arg1, Arg2)</var></a></dt>
+<dt class="undoc"><span style="float:right">&nbsp;</span><a name="upsh_version/1"><b class="pred">upsh_version</b><var class="arglist">(Arg1)</var></a></dt>
+</dl>
+
+</body>
+</html>

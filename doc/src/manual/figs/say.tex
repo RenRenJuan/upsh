@@ -1,0 +1,9 @@
+\begin{verbatim}
+say(Args) :- 
+    write_args( Args ).
+
+write_args( [] ).
+write_args( [H|T] ) :-
+    write( H ), nl,
+    write_args( T ).
+\end{verbatim}

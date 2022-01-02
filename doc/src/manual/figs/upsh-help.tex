@@ -1,0 +1,32 @@
+\begin{verbatim}
+
+usage: upsh {h,v}~ {(c),s} [a,b,e/1,f/1,d/1,l/1,o,p,r,w] - Program [Args]*.
+or
+       upsh [c] {(m),n} UArgs [{t,i}= Pn[,Vn] [PnArgs]]*.
+
+        h   : help; overrides,
+        v   : version; overrides,
+
+        c   : command line invocation (default),
+        s   : script invocation,
+
+        i/2 : provider script Program,
+        t/1 : script Program,
+
+        a   : last term will hold list of all read variables (upsh_vs/1).
+        b   : be verbose,
+        e/1 : errors file (default: std_out stream),
+        f   : name of functor for entry-goal (default: <Program>/1,0 then main/1,0),
+        d/1 : working directory (default: '.'),
+        l/1 : method of loading: the def co(m)pile, co(n)sult, loa(d), (l)ocate or (e)dit
+        p   : surpress loading info (when loading Program),
+        o   : do not translate Args; e.g. very=nice=tara not to very(nice(tara)),
+        r   : be strict about the '-',
+        w/1 : when finished do: ring 'bell' wait for 'input', 'both' of the above, or *none*
+        y/2 : spy this predicate (Name,Arity),
+
+For scripts add the following lines to the source and do chmod u+x <Program>.pl
+#! /bin/sh
+exec upsh s - $0 "$@"
+
+\end{verbatim}

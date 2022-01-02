@@ -1,0 +1,22 @@
+\begin{verbatim}
+usage: upsh {h,v}~ {(c),s} {(m),n} [b,e/1,f/1,d/1,p,o,r,w,a] - Program [Args]*.
+        h : help; overrides,
+        v : version; overrides,
+        c : command line invocation (default),
+        s : script invocation,
+        m : compile Program (default),
+        n : consult Program,
+        b : be verbose,
+        e : errors file (default: std_out stream),
+        f : name of functor for top goal (default: <Program>/1 then main/1),
+        d : working directory (default: '.'),
+        p : surpress loading info (when loading Program),
+        o : do not translate Args; e.g. very=nice=tara not to very(nice(tara)),
+        r : be strict about the '-',
+        w : wait for input at end of execution,
+        a : last term will hold list of all read variables (upsh_vs/1).
+
+For scripts add the following lines to the source and do chmod u+x <Program>.pl
+#!/bin/sh
+exec upsh s - $0 "$@"
+\end{verbatim}
