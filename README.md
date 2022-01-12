@@ -1,5 +1,5 @@
 # [MCP upsh fork](https://eg.meansofproduction.biz/eg/index.php/MCP-CMS)
-<span style="font-size: 12px">Divergence from original devloper's pkg</span>
+<span style="font-size: 12px">Divergence from original developer's pkg</span>
 
 > Additions for our knowledge engineering environment. 
 
